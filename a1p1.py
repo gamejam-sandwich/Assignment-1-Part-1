@@ -8,28 +8,49 @@ from pathlib import Path
 
 
 def list_options(path, commands, suffix_or_name):
-    #directory_path = Path(path)
+    # Check for recursion
+    if "-r" in commands:
+        items = path.rglob("*")
+    else:
+        items = path.iterdir()
     
+    results = []
+
     # Execute each command
     for command in commands:
-        if command == "-r":
-            # output directory content recursively
-            for item in path.rglob("*"):
-                print(item)
-        elif command == "-f":
-            # output files, excluding folders in the results
-            for item in path.iterdir():
-                if item.is_file(): print(item)
+        # output files, excluding folders in the results
+        if command == "-f":
+            for item in items:
+                if item.is_file():
+                    results.append(item)
+        
+        # output files that match a given name
         elif command == "-s":
-            # output files that match a given name
-            for item in path.iterdir():
+            for item in items:
                 if item.name == suffix_or_name:
-                    print(item)
+                    results.append(item)
+        
+        # output files that match an extension
         elif command == "-e":
-            # output files that match an extension
-            for item in path.iterdir():
+            for item in items:
                 if item.suffix[1:] == suffix_or_name:
-                    print(item)
+                    results.append(item)
+        
+    return results
+
+def print_results(results):
+    # Print files first, then print directories
+    files = []
+    directories = []
+    for item in results:
+        if item.is_file():
+            files.append(item)
+        elif item.is_dir():
+            directories.append(item)
+
+    results_final = files + directories
+    for item in results_final:
+        print(item)
 
 def split_input(inp):    
     user_input = inp.split()
@@ -47,11 +68,10 @@ def split_input(inp):
     return control, path, commands, suffix_or_name
 
 def run():
-    control, path, commands, suffix_or_name = split_input(input("COMMAND PATH -ADDITIONAL "))
-    path = Path(path)
+    control, path, commands, suffix_or_name = split_input(input())
 
     if control == "L":
-        list_options(path, commands, suffix_or_name)
+        print_results(list_options(Path(path), commands, suffix_or_name))
         run()
 
 
