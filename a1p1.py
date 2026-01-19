@@ -15,6 +15,7 @@ def recurse(path):
             items.extend(recurse(item))
     return items
 
+
 def list_options(path, commands, suffix_or_name):
     # Check for recursion
     if "-r" in commands:
@@ -32,9 +33,12 @@ def list_options(path, commands, suffix_or_name):
         elif "-s" in commands and item.name == suffix_or_name:
             results.append(item)
         # output files that match an extension
-        elif "-e" in commands and item.suffix[1:] == suffix_or_name and item.is_file():
+        elif ("-e" in commands and
+              item.suffix[1:] == suffix_or_name and
+              item.is_file()):
             results.append(item)
-    
+        else:
+            results.append(item)
     return results
 
 
@@ -47,7 +51,6 @@ def print_results(results):
             files.append(item)
         elif item.is_dir():
             directories.append(item)
-
     results_final = files + directories
     for item in results_final:
         print(item)
@@ -56,6 +59,9 @@ def print_results(results):
 def split_input(inp):
     tokens = inp.split()
     # Collect pieces of the input
+    control = tokens[0]
+    path = tokens[1]
+
     commands = []
     final_command_index = 0
     for token in tokens:
@@ -63,17 +69,17 @@ def split_input(inp):
             commands.append(token)
             final_command_index = inp.index(token) + 3
     suffix_or_name = inp[final_command_index:]
-    control = tokens[0]
-    path = tokens[1]
     return control, path, commands, suffix_or_name
 
 
 def run():
-    control, path, commands, suffix_or_name = split_input(input())
-
-    if control == "L":
-        print_results(list_options(Path(path), commands, suffix_or_name))
-        run()
+    try:
+        control, path, commands, suffix_or_name = split_input(input())
+        if control == "L":
+            print_results(list_options(Path(path), commands, suffix_or_name))
+            run()
+    except IndexError:
+        print("Goodbye")
 
 
 if __name__ == "__main__":
