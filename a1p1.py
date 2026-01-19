@@ -7,31 +7,34 @@
 from pathlib import Path
 
 
+def recurse(path):
+    items = []
+    for item in path.iterdir():
+        items.append(item)
+        if item.is_dir():
+            items.extend(recurse(item))
+    return items
+
 def list_options(path, commands, suffix_or_name):
     # Check for recursion
     if "-r" in commands:
-        items = path.rglob("*")
+        items = recurse(path)
     else:
-        items = path.iterdir()
+        items = list(path.iterdir())
     results = []
 
     # Execute each command
-    for command in commands:
+    for item in items:
         # output files, excluding folders in the results
-        if command == "-f":
-            for item in items:
-                if item.is_file():
-                    results.append(item)
+        if "-f" in commands and item.is_file():
+            results.append(item)
         # output files that match a given name
-        elif command == "-s":
-            for item in items:
-                if item.name == suffix_or_name:
-                    results.append(item)
+        elif "-s" in commands and item.name == suffix_or_name:
+            results.append(item)
         # output files that match an extension
-        elif command == "-e":
-            for item in items:
-                if item.suffix[1:] == suffix_or_name:
-                    results.append(item)
+        elif "-e" in commands and item.suffix[1:] == suffix_or_name and item.is_file():
+            results.append(item)
+    
     return results
 
 
@@ -51,17 +54,17 @@ def print_results(results):
 
 
 def split_input(inp):
-    user_input = inp.split()
+    tokens = inp.split()
     # Collect pieces of the input
     commands = []
     final_command_index = 0
-    for token in user_input:
+    for token in tokens:
         if token[0] == "-":
             commands.append(token)
             final_command_index = inp.index(token) + 3
     suffix_or_name = inp[final_command_index:]
-    control = user_input[0]
-    path = user_input[1]
+    control = tokens[0]
+    path = tokens[1]
     return control, path, commands, suffix_or_name
 
 
