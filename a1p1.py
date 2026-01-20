@@ -71,7 +71,9 @@ def run():
             print_results(list_options(Path(path), commands, suffix_or_name))
             run()
     except IndexError:
-        print("Goodbye")
+        print("Goodbye!")
+    except FileNotFoundError:
+        print("This file does not exist.")
 
 
 if __name__ == "__main__":
