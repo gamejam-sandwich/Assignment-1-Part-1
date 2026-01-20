@@ -37,22 +37,14 @@ def list_options(path, commands, suffix_or_name):
               item.suffix[1:] == suffix_or_name and
               item.is_file()):
             results.append(item)
-        else:
+        elif "-f" not in commands and "-e" not in commands:
             results.append(item)
     return results
 
 
 def print_results(results):
-    # Print files first, then print directories
-    files = []
-    directories = []
+    # Print results
     for item in results:
-        if item.is_file():
-            files.append(item)
-        elif item.is_dir():
-            directories.append(item)
-    results_final = files + directories
-    for item in results_final:
         print(item)
 
 
